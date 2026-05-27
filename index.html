@@ -495,8 +495,7 @@
   </section>
 
   <footer>
-    <p>Made for fun · Source document: <a href="SOURCES.md">SOURCES.md</a></p>
-    <p style="margin-top:8px;">No affiliation with Seinfeld, NBC, or any rights holder. Trivia only — all character names and episode references belong to their respective owners.</p>
+    <p>No affiliation with Seinfeld, NBC, or any rights holder. Trivia only — all character names and episode references belong to their respective owners.</p>
   </footer>
 </div>
 
@@ -531,10 +530,7 @@
 
   // Sort by difficulty (easy first), shuffle within each band
   function buildOrder() {
-    const easy   = shuffle(QUESTIONS.filter(q => q.difficulty === "easy"));
-    const medium = shuffle(QUESTIONS.filter(q => q.difficulty === "medium"));
-    const hard   = shuffle(QUESTIONS.filter(q => q.difficulty === "hard"));
-    return [...easy, ...medium, ...hard];
+    return shuffle(QUESTIONS);
   }
 
   // ────────────────────────────────────────────

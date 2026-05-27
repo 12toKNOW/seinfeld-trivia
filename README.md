@@ -6,8 +6,8 @@ A 65-question Seinfeld trivia quiz with sourced episode citations for every answ
 
 - **`index.html`** — the full quiz app (HTML, CSS, and JS all in one file)
 - **`questions.js`** — the question bank, sorted by difficulty with episode citations
-- **`SOURCES.md`** — a readable source document listing every question, answer, and episode reference
-- **`build-sources.js`** — Node script that regenerates `SOURCES.md` from `questions.js` (only needed if you edit questions)
+
+The episode source for each question is shown to the player inline, right after they answer it — no separate source document is needed.
 
 ## Scoring
 
@@ -21,7 +21,7 @@ A 65-question Seinfeld trivia quiz with sourced episode citations for every answ
 ## How to put this on GitHub Pages
 
 1. **Create a new GitHub repo** (e.g. `seinfeld-trivia`). Keep it public.
-2. **Upload these four files** to the root of the repo (`index.html`, `questions.js`, `SOURCES.md`, `README.md`). You can drag-and-drop them into the GitHub web UI if you don't want to use git on the command line.
+2. **Upload these three files** to the root of the repo (`index.html`, `questions.js`, `README.md`). You can drag-and-drop them into the GitHub web UI if you don't want to use git on the command line.
 3. **Enable GitHub Pages**: go to **Settings → Pages**, set Source to **Deploy from a branch**, pick the `main` branch and the `/ (root)` folder, then click Save.
 4. **Wait ~30 seconds**, then visit `https://<your-username>.github.io/seinfeld-trivia/`. That's your live trivia site.
 
@@ -42,23 +42,19 @@ Open `questions.js` in any text editor. Each entry has this shape:
 }
 ```
 
-After editing, regenerate the source document if you want it to stay in sync:
+The `episode` field is displayed to the player after they answer. The optional `note` field is shown as additional context.
 
-```bash
-node build-sources.js
-```
-
-Then commit and push — GitHub Pages will redeploy automatically.
+After editing, commit and push — GitHub Pages will redeploy automatically.
 
 ## A note on sources
 
-Episode citations follow the standard Season×Episode format used by Wikipedia, IMDb, and the major Seinfeld archives. Where a fact is established across the series (apartment numbers, recurring catchphrases, casting facts) rather than in a single episode, the source line says so. Where a recurring gag spans many episodes (Festivus, Vandelay, Del Boca Vista), the citation points to the first major appearance — the episode that established the joke.
+Episode citations follow the standard Season×Episode format used by Wikipedia, IMDb, and the major Seinfeld archives. Where a fact is established across the series rather than in a single episode (apartment numbers, recurring catchphrases, casting facts), the source line says so. Where a recurring gag spans many episodes (Festivus, Vandelay, Del Boca Vista), the citation points to the first major appearance — the episode that established the joke.
 
-If you spot an error, just edit `questions.js` and regenerate `SOURCES.md`.
+If you spot an error, just edit `questions.js` and push.
 
 ## What's next
 
-If this goes well, the same template works for any show. To make a Friends version, you'd just swap out `questions.js` (and update the title and styling in `index.html`). The scoring, navigation, and source-document logic don't have to change.
+If this goes well, the same template works for any show. To make a Friends version, you'd just swap out `questions.js` (and update the title and styling in `index.html`). The scoring, navigation, and feedback logic don't have to change.
 
 ---
 
