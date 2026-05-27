@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Seinfeld Trivia Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One+SC&family=Special+Elite&family=Crimson+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #f6f1e4;
+    --paper-2: #ede5d0;
+    --red: #e63946;
+    --red-deep: #b6202e;
+    --yellow: #f4c531;
+    --teal: #2a9d8f;
+    --line: #1a1a1a;
+    --shadow: rgba(26, 26, 26, 0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(230, 57, 70, 0.08) 0, transparent 32%),
+      radial-gradient(circle at 88% 78%, rgba(42, 157, 143, 0.07) 0, transparent 36%),
+      repeating-linear-gradient(0deg, transparent 0 32px, rgba(26,26,26,0.025) 32px 33px);
+    padding: 32px 16px 64px;
+  }
+
+  .stage {
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  /* ───────────── HEADER ───────────── */
+  header.hero {
+    text-align: center;
+    padding: 24px 0 32px;
+    border-bottom: 3px solid var(--ink);
+    margin-bottom: 32px;
+    position: relative;
+  }
+  header.hero::before {
+    content: "";
+    position: absolute;
+    top: 6px; left: 50%;
+    transform: translateX(-50%);
+    width: 80px; height: 4px;
+    background: var(--ink);
+  }
+  .kicker {
+    font-family: 'Special Elite', monospace;
+    letter-spacing: 0.3em;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--ink);
+    opacity: 0.65;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: clamp(2.4rem, 7vw, 4rem);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--red);
+    text-transform: uppercase;
+    text-shadow: 3px 3px 0 var(--ink);
+    margin: 8px 0 4px;
+  }
+  h1 .yada {
+    display: block;
+    font-size: 0.42em;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+    text-shadow: none;
+    margin-top: 12px;
+    font-family: 'Special Elite', monospace;
+  }
+  .tagline {
+    font-style: italic;
+    font-size: 16px;
+    opacity: 0.8;
+    max-width: 540px;
+    margin: 14px auto 0;
+  }
+
+  /* ───────────── SCORE BAR ───────────── */
+  .scorebar {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 4px;
+    padding: 14px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    box-shadow: 4px 4px 0 var(--shadow);
+    position: sticky;
+    top: 8px;
+    z-index: 30;
+  }
+  .scorebar .meta {
+    font-family: 'Special Elite', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .scorebar .points {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: 22px;
+    color: var(--yellow);
+  }
+  .progress {
+    flex: 1 0 100%;
+    height: 6px;
+    background: rgba(246, 241, 228, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress > span {
+    display: block; height: 100%;
+    background: var(--yellow);
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+
+  /* ───────────── INTRO PANEL ───────────── */
+  .intro {
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    padding: 28px 28px 24px;
+    margin-bottom: 28px;
+    box-shadow: 5px 5px 0 var(--shadow);
+  }
+  .intro h2 {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: 22px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    color: var(--red-deep);
+  }
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .rule {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    padding: 12px;
+    text-align: center;
+    border-radius: 3px;
+  }
+  .rule .pts {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: 24px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .rule.easy .pts { color: var(--teal); }
+  .rule.medium .pts { color: var(--yellow); -webkit-text-stroke: 1px var(--ink); }
+  .rule.hard .pts { color: var(--red); }
+  .rule .label {
+    font-family: 'Special Elite', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  @media (max-width: 480px) {
+    .rules { grid-template-columns: 1fr; }
+  }
+
+  .start-btn, .restart-btn, .reveal-btn {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--red);
+    color: var(--paper);
+    border: 2px solid var(--ink);
+    padding: 14px 28px;
+    cursor: pointer;
+    border-radius: 4px;
+    box-shadow: 4px 4px 0 var(--ink);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .start-btn:hover, .restart-btn:hover, .reveal-btn:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  .start-btn:active, .restart-btn:active, .reveal-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  /* ───────────── QUESTION CARD ───────────── */
+  .quiz-area { display: none; }
+  .quiz-area.active { display: block; }
+
+  .qcard {
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 5px 5px 0 var(--shadow);
+    position: relative;
+  }
+  .qcard .qheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1.5px dashed var(--ink);
+  }
+  .qnum {
+    font-family: 'Special Elite', monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.75;
+  }
+  .pill {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 5px 10px;
+    border: 1.5px solid var(--ink);
+    border-radius: 100px;
+  }
+  .pill.easy { background: var(--teal); color: var(--paper); }
+  .pill.medium { background: var(--yellow); color: var(--ink); }
+  .pill.hard { background: var(--red); color: var(--paper); }
+
+  .qtext {
+    font-size: 21px;
+    line-height: 1.4;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .choices {
+    display: grid;
+    gap: 10px;
+  }
+  .choice {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 3px;
+    padding: 14px 18px;
+    cursor: pointer;
+    font-family: 'Crimson Pro', serif;
+    font-size: 17px;
+    text-align: left;
+    transition: transform 0.08s ease, background 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .choice:hover:not(.locked) {
+    background: var(--yellow);
+    transform: translateX(4px);
+  }
+  .choice .marker {
+    font-family: 'Bowlby One SC', sans-serif;
+    background: var(--ink);
+    color: var(--paper);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .choice.correct {
+    background: var(--teal);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .choice.correct .marker { background: var(--paper); color: var(--ink); }
+  .choice.incorrect {
+    background: var(--red-deep);
+    color: var(--paper);
+  }
+  .choice.incorrect .marker { background: var(--paper); color: var(--red-deep); }
+  .choice.locked { cursor: default; }
+  .choice.faded { opacity: 0.45; }
+
+  .feedback {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: var(--paper);
+    border-left: 4px solid var(--ink);
+    font-size: 15px;
+    display: none;
+  }
+  .feedback.shown { display: block; }
+  .feedback .src {
+    font-family: 'Special Elite', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 6px;
+    opacity: 0.75;
+  }
+  .feedback .verdict {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .feedback .verdict.yes { color: var(--teal); }
+  .feedback .verdict.no { color: var(--red-deep); }
+
+  .nav {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  .next-btn {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: 14px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 12px 24px;
+    cursor: pointer;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: none;
+  }
+  .next-btn.shown { display: inline-block; }
+  .next-btn:hover { background: var(--red-deep); }
+
+  /* ───────────── RESULTS ───────────── */
+  .results {
+    display: none;
+    text-align: center;
+    background: var(--paper-2);
+    border: 2px solid var(--ink);
+    padding: 36px 28px;
+    border-radius: 4px;
+    box-shadow: 5px 5px 0 var(--shadow);
+  }
+  .results.active { display: block; }
+  .results .verdict-title {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: clamp(2rem, 6vw, 3rem);
+    color: var(--red);
+    text-shadow: 2px 2px 0 var(--ink);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .results .verdict-rank {
+    font-family: 'Special Elite', monospace;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .scorebox {
+    display: inline-block;
+    border: 2px solid var(--ink);
+    padding: 18px 36px;
+    margin: 12px auto 18px;
+    background: var(--paper);
+  }
+  .scorebox .big {
+    font-family: 'Bowlby One SC', sans-serif;
+    font-size: 56px;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .scorebox .out-of {
+    font-family: 'Special Elite', monospace;
+    font-size: 12px;
+    opacity: 0.7;
+    letter-spacing: 0.1em;
+  }
+  .breakdown {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 480px;
+    margin: 24px auto;
+  }
+  .breakdown div {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    padding: 10px;
+  }
+  .breakdown div strong { display: block; font-family: 'Bowlby One SC', sans-serif; font-size: 18px; }
+  .breakdown div span { font-family: 'Special Elite', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.7; }
+  @media (max-width: 480px) { .breakdown { grid-template-columns: 1fr; } }
+
+  /* ───────────── FOOTER ───────────── */
+  footer {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 2px dashed var(--ink);
+    font-family: 'Special Elite', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  footer a { color: var(--red-deep); text-decoration: none; border-bottom: 1px solid var(--red-deep); }
+  footer a:hover { background: var(--yellow); }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <header class="hero">
+    <div class="kicker">A Show About Trivia</div>
+    <h1>The Seinfeld<br>Trivia Challenge
+      <span class="yada">— Yada, Yada, Yada —</span>
+    </h1>
+    <p class="tagline">Sixty-five questions across nine seasons. Are you a Master of Your Domain… or just a re-gifter?</p>
+  </header>
+
+  <!-- INTRO -->
+  <section class="intro" id="intro">
+    <h2>How it works</h2>
+    <p>You'll face 65 multiple-choice questions sorted by difficulty. Points are awarded based on how tough each one is. After every answer, you'll see the correct response and the episode it's drawn from — perfect for both serious fans and the casual viewer who just really likes the Soup Nazi.</p>
+    <div class="rules">
+      <div class="rule easy"><span class="pts">1</span><span class="label">Easy — 20 questions</span></div>
+      <div class="rule medium"><span class="pts">3</span><span class="label">Medium — 25 questions</span></div>
+      <div class="rule hard"><span class="pts">5</span><span class="label">Hard — 20 questions</span></div>
+    </div>
+    <p style="text-align:center; margin-top:20px;">
+      <button class="start-btn" id="startBtn">Begin the Quiz</button>
+    </p>
+  </section>
+
+  <!-- SCORE BAR (hidden until quiz starts) -->
+  <div class="scorebar" id="scorebar" style="display:none;">
+    <div class="meta">Question <span id="qNum">1</span> / <span id="qTotal">65</span></div>
+    <div class="meta">Score: <span class="points" id="scoreNow">0</span> / <span id="scoreMax">0</span></div>
+    <div class="progress"><span id="progressBar"></span></div>
+  </div>
+
+  <!-- QUIZ -->
+  <section class="quiz-area" id="quizArea">
+    <div class="qcard" id="qcard">
+      <div class="qheader">
+        <div class="qnum" id="qLabel">Question 1</div>
+        <div class="pill easy" id="qPill">Easy · 1 pt</div>
+      </div>
+      <div class="qtext" id="qText">Loading…</div>
+      <div class="choices" id="choices"></div>
+      <div class="feedback" id="feedback">
+        <div class="verdict" id="verdict"></div>
+        <div id="feedbackBody"></div>
+        <div class="src" id="srcLine"></div>
+      </div>
+      <div class="nav">
+        <button class="next-btn" id="nextBtn">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="results" id="results">
+    <div class="verdict-title" id="resultTitle">Yada Yada Yada.</div>
+    <div class="verdict-rank" id="resultRank">— Verdict pending —</div>
+    <div class="scorebox">
+      <div class="big" id="finalScore">0</div>
+      <div class="out-of">out of <span id="finalMax">0</span></div>
+    </div>
+    <p id="resultBlurb" style="max-width: 480px; margin: 0 auto 8px; font-style: italic;"></p>
+    <div class="breakdown" id="breakdown"></div>
+    <button class="restart-btn" id="restartBtn">Play Again</button>
+  </section>
+
+  <footer>
+    <p>Made for fun · Source document: <a href="SOURCES.md">SOURCES.md</a></p>
+    <p style="margin-top:8px;">No affiliation with Seinfeld, NBC, or any rights holder. Trivia only — all character names and episode references belong to their respective owners.</p>
+  </footer>
+</div>
+
+<!-- Question bank -->
+<script src="questions.js"></script>
+
+<script>
+  // ────────────────────────────────────────────
+  //  STATE
+  // ────────────────────────────────────────────
+  let state = {
+    order: [],
+    idx: 0,
+    score: 0,
+    answers: [],   // { id, correct, points }
+    started: false
+  };
+
+  const maxScore = QUESTIONS.reduce((s, q) => s + q.points, 0);
+
+  // ────────────────────────────────────────────
+  //  UTILITY
+  // ────────────────────────────────────────────
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // Sort by difficulty (easy first), shuffle within each band
+  function buildOrder() {
+    const easy   = shuffle(QUESTIONS.filter(q => q.difficulty === "easy"));
+    const medium = shuffle(QUESTIONS.filter(q => q.difficulty === "medium"));
+    const hard   = shuffle(QUESTIONS.filter(q => q.difficulty === "hard"));
+    return [...easy, ...medium, ...hard];
+  }
+
+  // ────────────────────────────────────────────
+  //  RENDER
+  // ────────────────────────────────────────────
+  function startQuiz() {
+    state.order = buildOrder();
+    state.idx = 0;
+    state.score = 0;
+    state.answers = [];
+    state.started = true;
+
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('results').classList.remove('active');
+    document.getElementById('scorebar').style.display = 'flex';
+    document.getElementById('quizArea').classList.add('active');
+    document.getElementById('qTotal').textContent = state.order.length;
+    document.getElementById('scoreMax').textContent = maxScore;
+    document.getElementById('finalMax').textContent = maxScore;
+
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const q = state.order[state.idx];
+    const card = document.getElementById('qcard');
+
+    // Update scorebar
+    document.getElementById('qNum').textContent = state.idx + 1;
+    document.getElementById('scoreNow').textContent = state.score;
+    document.getElementById('progressBar').style.width = ((state.idx) / state.order.length * 100) + '%';
+
+    // Update question
+    document.getElementById('qLabel').textContent = 'Question ' + (state.idx + 1);
+
+    const pill = document.getElementById('qPill');
+    pill.className = 'pill ' + q.difficulty;
+    pill.textContent = q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) + ' · ' + q.points + ' pt' + (q.points > 1 ? 's' : '');
+
+    document.getElementById('qText').textContent = q.q;
+
+    // Render choices
+    const choicesEl = document.getElementById('choices');
+    choicesEl.innerHTML = '';
+    const labels = ['A', 'B', 'C', 'D'];
+    q.choices.forEach((choice, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice';
+      btn.innerHTML = '<span class="marker">' + labels[i] + '</span><span>' + choice + '</span>';
+      btn.addEventListener('click', () => handleAnswer(i, btn));
+      choicesEl.appendChild(btn);
+    });
+
+    // Reset feedback
+    document.getElementById('feedback').classList.remove('shown');
+    document.getElementById('nextBtn').classList.remove('shown');
+  }
+
+  function handleAnswer(selectedIdx, btn) {
+    const q = state.order[state.idx];
+    const allChoices = document.querySelectorAll('.choice');
+    const correct = selectedIdx === q.answer;
+
+    allChoices.forEach((c, i) => {
+      c.classList.add('locked');
+      if (i === q.answer) c.classList.add('correct');
+      else if (i === selectedIdx) c.classList.add('incorrect');
+      else c.classList.add('faded');
+    });
+
+    if (correct) state.score += q.points;
+    state.answers.push({ id: q.id, correct: correct, points: correct ? q.points : 0 });
+
+    const fb = document.getElementById('feedback');
+    const verdict = document.getElementById('verdict');
+    const body = document.getElementById('feedbackBody');
+    const src = document.getElementById('srcLine');
+
+    if (correct) {
+      verdict.className = 'verdict yes';
+      verdict.textContent = '✓ Correct — +' + q.points + ' pt' + (q.points > 1 ? 's' : '');
+    } else {
+      verdict.className = 'verdict no';
+      verdict.textContent = '✗ Incorrect — the answer is ' + ['A','B','C','D'][q.answer];
+    }
+
+    let bodyText = '';
+    if (q.note) bodyText += q.note + ' ';
+    body.textContent = bodyText.trim();
+
+    src.textContent = 'Source: ' + q.episode;
+
+    fb.classList.add('shown');
+    document.getElementById('scoreNow').textContent = state.score;
+    document.getElementById('nextBtn').classList.add('shown');
+  }
+
+  function nextQuestion() {
+    state.idx++;
+    if (state.idx >= state.order.length) {
+      showResults();
+    } else {
+      renderQuestion();
+      // Scroll the question into view on mobile
+      document.getElementById('qcard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function showResults() {
+    document.getElementById('quizArea').classList.remove('active');
+    document.getElementById('results').classList.add('active');
+    document.getElementById('scorebar').style.display = 'none';
+
+    document.getElementById('finalScore').textContent = state.score;
+    const pct = state.score / maxScore;
+
+    const rank = getRank(pct);
+    document.getElementById('resultTitle').textContent = rank.title;
+    document.getElementById('resultRank').textContent = rank.rank;
+    document.getElementById('resultBlurb').textContent = rank.blurb;
+
+    // Breakdown
+    const byDiff = { easy: { right: 0, total: 0 }, medium: { right: 0, total: 0 }, hard: { right: 0, total: 0 } };
+    state.order.forEach((q, i) => {
+      byDiff[q.difficulty].total++;
+      if (state.answers[i] && state.answers[i].correct) byDiff[q.difficulty].right++;
+    });
+    document.getElementById('breakdown').innerHTML =
+      '<div><strong>' + byDiff.easy.right + ' / ' + byDiff.easy.total + '</strong><span>Easy</span></div>' +
+      '<div><strong>' + byDiff.medium.right + ' / ' + byDiff.medium.total + '</strong><span>Medium</span></div>' +
+      '<div><strong>' + byDiff.hard.right + ' / ' + byDiff.hard.total + '</strong><span>Hard</span></div>';
+  }
+
+  function getRank(pct) {
+    if (pct >= 0.95) return { title: 'Master of Your Domain', rank: 'TIER S · Festivus Pole status', blurb: 'You are a true scholar of nothing. Even Newman would salute you.' };
+    if (pct >= 0.80) return { title: 'Giddy-Up.', rank: 'TIER A · Cosmo-level command', blurb: 'Impressive! You\'ve clearly logged some serious couch time at Jerry\'s place.' };
+    if (pct >= 0.65) return { title: 'Pretty, Pretty, Pretty Good.', rank: 'TIER B · Solid fan credentials', blurb: 'Strong recall. You may have just earned a corner booth at Monk\'s.' };
+    if (pct >= 0.50) return { title: 'Serenity Now.', rank: 'TIER C · A passing knowledge', blurb: 'You know the hits. Maybe revisit Seasons 4–7 and try again.' };
+    if (pct >= 0.30) return { title: 'These Pretzels Are Making Me Thirsty.', rank: 'TIER D · A casual viewer', blurb: 'You caught some classic moments but missed the deep cuts. The deep cuts are where it\'s at.' };
+    return { title: 'No Soup for You!', rank: 'TIER F · Banned for one year', blurb: 'It\'s okay. Now is a wonderful time to start watching from Season 1.' };
+  }
+
+  // ────────────────────────────────────────────
+  //  WIRE UP
+  // ────────────────────────────────────────────
+  document.getElementById('startBtn').addEventListener('click', startQuiz);
+  document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+  document.getElementById('restartBtn').addEventListener('click', startQuiz);
+</script>
+</body>
+</html>
