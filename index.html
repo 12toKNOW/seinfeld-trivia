@@ -437,18 +437,19 @@
     <h1>The Seinfeld<br>Trivia Challenge
       <span class="yada">— Yada, Yada, Yada —</span>
     </h1>
-    <p class="tagline">Sixty-five questions across nine seasons. Are you a Master of Your Domain… or just a re-gifter?</p>
+    <p class="tagline">Thirty questions, drawn at random from a bank of 150 across nine seasons. Score points, beat the clock — are you a Master of Your Domain, or just a re-gifter?</p>
   </header>
 
   <!-- INTRO -->
   <section class="intro" id="intro">
     <h2>How it works</h2>
-    <p>You'll face 65 multiple-choice questions sorted by difficulty. Points are awarded based on how tough each one is. After every answer, you'll see the correct response and the episode it's drawn from — perfect for both serious fans and the casual viewer who just really likes the Soup Nazi.</p>
+    <p>Each round draws 30 random questions from a bank of 150 — 10 Easy, 12 Medium, 8 Hard — so no two playthroughs are quite the same. Points are awarded based on difficulty. After every answer, you'll see the correct response and the episode it's drawn from. A timer counts up from the moment you begin; your final time is shown alongside your score.</p>
     <div class="rules">
-      <div class="rule easy"><span class="pts">1</span><span class="label">Easy — 20 questions</span></div>
-      <div class="rule medium"><span class="pts">3</span><span class="label">Medium — 25 questions</span></div>
-      <div class="rule hard"><span class="pts">5</span><span class="label">Hard — 20 questions</span></div>
+      <div class="rule easy"><span class="pts">1</span><span class="label">Easy — 10 / round</span></div>
+      <div class="rule medium"><span class="pts">3</span><span class="label">Medium — 12 / round</span></div>
+      <div class="rule hard"><span class="pts">5</span><span class="label">Hard — 8 / round</span></div>
     </div>
+    <p style="text-align:center; margin-top:8px; font-family: 'Special Elite', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7;">Max score per round: 86 points</p>
     <p style="text-align:center; margin-top:20px;">
       <button class="start-btn" id="startBtn">Begin the Quiz</button>
     </p>
@@ -456,8 +457,9 @@
 
   <!-- SCORE BAR (hidden until quiz starts) -->
   <div class="scorebar" id="scorebar" style="display:none;">
-    <div class="meta">Question <span id="qNum">1</span> / <span id="qTotal">65</span></div>
-    <div class="meta">Score: <span class="points" id="scoreNow">0</span> / <span id="scoreMax">0</span></div>
+    <div class="meta">Question <span id="qNum">1</span> / <span id="qTotal">30</span></div>
+    <div class="meta">Score: <span class="points" id="scoreNow">0</span> / <span id="scoreMax">86</span></div>
+    <div class="meta">Time: <span class="points" id="timerDisplay">0:00</span></div>
     <div class="progress"><span id="progressBar"></span></div>
   </div>
 
@@ -489,6 +491,10 @@
       <div class="big" id="finalScore">0</div>
       <div class="out-of">out of <span id="finalMax">0</span></div>
     </div>
+    <div class="scorebox" style="margin-left: 8px;">
+      <div class="big" id="finalTime">0:00</div>
+      <div class="out-of">total time</div>
+    </div>
     <p id="resultBlurb" style="max-width: 480px; margin: 0 auto 8px; font-style: italic;"></p>
     <div class="breakdown" id="breakdown"></div>
     <button class="restart-btn" id="restartBtn">Play Again</button>
@@ -511,10 +517,19 @@
     idx: 0,
     score: 0,
     answers: [],   // { id, correct, points }
-    started: false
+    started: false,
+    startTime: 0,
+    elapsedMs: 0,
+    timerInterval: null
   };
 
-  const maxScore = QUESTIONS.reduce((s, q) => s + q.points, 0);
+  // Round structure: 10 easy + 12 medium + 8 hard = 30 questions, max 86 points
+  const ROUND_EASY = 10;
+  const ROUND_MEDIUM = 12;
+  const ROUND_HARD = 8;
+  const ROUND_TOTAL = ROUND_EASY + ROUND_MEDIUM + ROUND_HARD; // 30
+  const ROUND_MAX_SCORE = ROUND_EASY * 1 + ROUND_MEDIUM * 3 + ROUND_HARD * 5; // 86
+  const maxScore = ROUND_MAX_SCORE;
 
   // ────────────────────────────────────────────
   //  UTILITY
@@ -528,9 +543,48 @@
     return a;
   }
 
-  // Sort by difficulty (easy first), shuffle within each band
+  // Format milliseconds as M:SS
+  function formatTime(ms) {
+    const totalSec = Math.floor(ms / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function startTimer() {
+    state.startTime = Date.now();
+    state.elapsedMs = 0;
+    if (state.timerInterval) clearInterval(state.timerInterval);
+    state.timerInterval = setInterval(updateTimer, 250);
+    updateTimer();
+  }
+
+  function updateTimer() {
+    state.elapsedMs = Date.now() - state.startTime;
+    const el = document.getElementById('timerDisplay');
+    if (el) el.textContent = formatTime(state.elapsedMs);
+  }
+
+  function stopTimer() {
+    if (state.timerInterval) {
+      clearInterval(state.timerInterval);
+      state.timerInterval = null;
+    }
+    state.elapsedMs = Date.now() - state.startTime;
+  }
+
+  // Draw 30 random questions from the pool: 10 easy / 12 medium / 8 hard,
+  // then shuffle the combined set so difficulties are mixed throughout the round.
   function buildOrder() {
-    return shuffle(QUESTIONS);
+    const easyPool = QUESTIONS.filter(function (q) { return q.difficulty === 'easy'; });
+    const mediumPool = QUESTIONS.filter(function (q) { return q.difficulty === 'medium'; });
+    const hardPool = QUESTIONS.filter(function (q) { return q.difficulty === 'hard'; });
+
+    const easy = shuffle(easyPool).slice(0, ROUND_EASY);
+    const medium = shuffle(mediumPool).slice(0, ROUND_MEDIUM);
+    const hard = shuffle(hardPool).slice(0, ROUND_HARD);
+
+    return shuffle(easy.concat(medium).concat(hard));
   }
 
   // ────────────────────────────────────────────
@@ -551,6 +605,7 @@
     document.getElementById('scoreMax').textContent = maxScore;
     document.getElementById('finalMax').textContent = maxScore;
 
+    startTimer();
     renderQuestion();
   }
 
@@ -640,11 +695,14 @@
   }
 
   function showResults() {
+    stopTimer();
+
     document.getElementById('quizArea').classList.remove('active');
     document.getElementById('results').classList.add('active');
     document.getElementById('scorebar').style.display = 'none';
 
     document.getElementById('finalScore').textContent = state.score;
+    document.getElementById('finalTime').textContent = formatTime(state.elapsedMs);
     const pct = state.score / maxScore;
 
     const rank = getRank(pct);
