@@ -627,11 +627,20 @@
 
     document.getElementById('qText').textContent = q.q;
 
+    // Shuffle the choices for this question so the correct answer
+    // doesn't always land on A. We build an array of indices [0,1,2,3],
+    // shuffle it, then map to choice text. The new correct index is
+    // wherever the original q.answer ended up after shuffling.
+    const order = shuffle([0, 1, 2, 3]);
+    const displayChoices = order.map(function (origIdx) { return q.choices[origIdx]; });
+    const newCorrectIdx = order.indexOf(q.answer);
+    state.currentCorrectIdx = newCorrectIdx;
+
     // Render choices
     const choicesEl = document.getElementById('choices');
     choicesEl.innerHTML = '';
     const labels = ['A', 'B', 'C', 'D'];
-    q.choices.forEach((choice, i) => {
+    displayChoices.forEach((choice, i) => {
       const btn = document.createElement('button');
       btn.className = 'choice';
       btn.innerHTML = '<span class="marker">' + labels[i] + '</span><span>' + choice + '</span>';
@@ -646,12 +655,13 @@
 
   function handleAnswer(selectedIdx, btn) {
     const q = state.order[state.idx];
+    const correctIdx = state.currentCorrectIdx;
     const allChoices = document.querySelectorAll('.choice');
-    const correct = selectedIdx === q.answer;
+    const correct = selectedIdx === correctIdx;
 
     allChoices.forEach((c, i) => {
       c.classList.add('locked');
-      if (i === q.answer) c.classList.add('correct');
+      if (i === correctIdx) c.classList.add('correct');
       else if (i === selectedIdx) c.classList.add('incorrect');
       else c.classList.add('faded');
     });
@@ -669,7 +679,7 @@
       verdict.textContent = '✓ Correct — +' + q.points + ' pt' + (q.points > 1 ? 's' : '');
     } else {
       verdict.className = 'verdict no';
-      verdict.textContent = '✗ Incorrect — the answer is ' + ['A','B','C','D'][q.answer];
+      verdict.textContent = '✗ Incorrect — the answer is ' + ['A','B','C','D'][correctIdx];
     }
 
     let bodyText = '';
